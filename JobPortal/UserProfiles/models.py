@@ -21,6 +21,7 @@ class Role(models.Model):
 
 class Student(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
+    Password=models.CharField(max_length=100,null=True,blank=True)
     First_Name=models.CharField(max_length=100,null=True,blank=True)
     Last_Name=models.CharField(max_length=100,null=True,blank=True)
     Phone=models.BigIntegerField(null=True,blank=True)
@@ -37,6 +38,7 @@ class Student(models.Model):
     
 class Manager(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
+    Password=models.CharField(max_length=100,null=True,blank=True)
     First_Name=models.CharField(max_length=100,null=True,blank=True)
     Last_Name=models.CharField(max_length=100,null=True,blank=True)
     Department=models.ForeignKey(Departments,on_delete=models.SET_NULL,null=True,blank=True)
@@ -52,4 +54,36 @@ class Manager(models.Model):
     def __str__(self):
         return f'{self.Last_Name}, {self.First_Name}'
     
+class Job(models.Model):
+    Status_Choices=(
+        ('open','Open'),
+        ('closed','Closed'),
+        ('filled','Filled')
+    )
+    ID=models.UUIDField(default=uuid.uuid4,primary_key=True,blank=False,null=False,editable=False)
+    Manager=models.ForeignKey(Manager,on_delete=models.SET_NULL,null=True,blank=True)
+    Department=models.ForeignKey(Departments,on_delete=models.SET_NULL,null=True,blank=True)
+    Title=models.CharField(max_length=100,null=True,blank=True)
+    Description=models.TextField(max_length=1000)
+    PostingDate=models.DateField()
+    Status=models.CharField(max_length=20,choices=Status_Choices)
+    NumberOfOpenings=models.IntegerField(null=True,blank=False)
+    class Meta:
+        verbose_name_plural='JobPostings'
+    def __str__(self):
+        return f'{self.Title}, {self.Department}'
 
+class JobApplication(models.Model):
+    Status_Choices=(
+        ('applied','Applied'),
+        ('shortlisted','Shortlisted'),
+        ('selected','Selected')
+    )
+    Id=models.UUIDField(default=uuid.uuid4,primary_key=True,blank=False,null=False,editable=False)
+    user=models.OneToOneField(User,on_delete=models.CASCADE)
+    Job=models.ForeignKey(Job,on_delete=models.SET_NULL,null=True,blank=True)
+    Status=models.CharField(max_length=20,choices=Status_Choices)
+    class Meta:
+        verbose_name_plural='JobApplications'
+    def __str__(self):
+        return f'{self.Job.Title} by {self.user}'
