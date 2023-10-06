@@ -12,12 +12,12 @@ class Departments(models.Model):
         return self.Department_Name
 
 class Role(models.Model):
-    Department_id=models.UUIDField(default=uuid.uuid4,primary_key=True,blank=False,null=False,editable=False)
-    Department_Name=models.CharField(max_length=100)
+    id=models.UUIDField(default=uuid.uuid4,primary_key=True,blank=False,null=False,editable=False)
+    Name=models.CharField(max_length=100)
     class Meta:
         verbose_name_plural="Roles"
     def __str__(self):
-        return self.Department_Name
+        return self.Name
 
 class Student(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
