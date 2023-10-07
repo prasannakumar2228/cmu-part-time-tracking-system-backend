@@ -2,10 +2,9 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from.serializers import StudentSerializer
+from.serializers import *
 from django.contrib.auth.models import User
-
-from UserProfiles.models import Student,Manager
+from UserProfiles.models import Student,Manager,Departments
 @api_view(['GET'])
 def GetRoutes(request):
     routes=[
@@ -44,7 +43,7 @@ def getStudents(request):
 def getManagers(request):
     if request.method == 'GET':
         users = Manager.objects.all()
-        serializer = StudentSerializer(users, many=True)
+        serializer = ManagerSerializer(users, many=True)
         return Response(serializer.data)
     elif request.method=='PUT':
         username=request.data.get('username')
@@ -60,7 +59,20 @@ def getManagers(request):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'POST':
-        serializer = StudentSerializer(data=request.data)
+        serializer = ManagerSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['GET','POST','PUT'])
+def getDepartments(request):
+    if request.method=="GET":
+        departments=Departments.objects.all()
+        serializer=DepartmentSerializer(departments,many=True)
+        return Response(serializer.data)
+    if request.method=="POST":
+        serializer=DepartmentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

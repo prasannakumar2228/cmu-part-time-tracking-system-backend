@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 class Departments(models.Model):
     Department_id=models.UUIDField(default=uuid.uuid4,primary_key=True,blank=False,null=False,editable=False)
-    Department_Name=models.CharField(max_length=100)
+    Department_Name=models.CharField(max_length=100,unique=True)
     class Meta:
         verbose_name_plural="Departments"
     def __str__(self):
