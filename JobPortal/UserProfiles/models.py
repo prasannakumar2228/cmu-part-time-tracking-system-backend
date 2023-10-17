@@ -21,7 +21,6 @@ class Role(models.Model):
 
 class Student(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
-    Password=models.CharField(max_length=100,null=True,blank=True)
     First_Name=models.CharField(max_length=100,null=True,blank=True)
     Last_Name=models.CharField(max_length=100,null=True,blank=True)
     Phone=models.BigIntegerField(null=True,blank=True)
@@ -38,7 +37,6 @@ class Student(models.Model):
     
 class Manager(models.Model):
     user=models.OneToOneField(User,on_delete=models.CASCADE,primary_key=True)
-    Password=models.CharField(max_length=100,null=True,blank=True)
     First_Name=models.CharField(max_length=100,null=True,blank=True)
     Last_Name=models.CharField(max_length=100,null=True,blank=True)
     Department=models.ForeignKey(Departments,on_delete=models.SET_NULL,null=True,blank=True)
