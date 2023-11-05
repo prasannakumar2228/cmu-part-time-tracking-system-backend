@@ -1,23 +1,19 @@
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save, post_delete
-from .models import Student,Manager
-from django.dispatch import receiver
+from .models import Profile
 
-@receiver(post_save, sender=Student)
-def UpdateUser(sender, instance, created, **kwargs):
-    user = User.objects.get(username=instance.user)
-    if created==False:
-        user.first_name=instance.First_Name
-        user.last_name=instance.Last_Name
-        user.email=instance.Email
-        user.save()
 
-def DeleteProfile(sender, instance,**kwargs):
-    user=instance.user
-    user.delete()
+def CreateProfile(sender, instance, created, **kwargs):
+    if created:
+        profile=Profile.objects.create(
+            user=instance,
+            First_Name=instance.first_name,
+            Last_Name=instance.last_name,
+            Email=instance.email
+
+        )
 
 
 
 
-post_save.connect(UpdateUser,sender=Student)
-post_delete.connect(DeleteProfile,sender=Student)
+post_save.connect(CreateProfile,sender=User)
