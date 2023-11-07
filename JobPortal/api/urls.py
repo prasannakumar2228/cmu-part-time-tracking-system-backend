@@ -10,5 +10,6 @@ urlpatterns=[
     path('jobposts/<str:pk>/',views.getJobPost),
     path('jobapplications/',views.getJobApplications),
     path('jobapplications/<str:id>/',views.getJobApplication),
+    path('waitlist/<str:jobid>/<str:username>/',views.getWaitlist)
 
 ]

@@ -157,3 +157,27 @@ def getJobApplication(request, id):
     elif request.method == 'DELETE':
         job_application.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+@api_view(['GET'])
+def getWaitlist(request, jobid, username):
+    try:
+        jobpost = JobPost.objects.get(id=jobid)
+        student = Profile.objects.get(user__username=username)
+        application = JobApplication.objects.filter(Student=student,jobPost=jobpost,ApplicationStatus='waitlist').order_by('created_on')
+
+        if not application.exists():
+            return Response({'error': 'Student is not in the waitlist'}, status=status.HTTP_404_NOT_FOUND)
+        position = list(application).index(application[0]) + 1
+        return Response({'position': position}, status=status.HTTP_200_OK)
+
+    except JobPost.DoesNotExist:
+        return Response({'error': 'JobPost does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    except Profile.DoesNotExist:
+        return Response({'error': 'Profile does not exist'}, status=status.HTTP_404_NOT_FOUND)
+    except JobApplication.DoesNotExist:
+        return Response({'error': 'JobApplication does not exist'}, status=status.HTTP_404_NOT_FOUND)
+
+
+        
+    
+

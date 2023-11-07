@@ -85,6 +85,7 @@ class JobApplication(models.Model):
         ('shortlisted', 'Shortlisted'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
+        ('waitlist', 'Waitlist')
     )
     ACADEMIC_STATUS_CHOICES = (
         ('freshman', 'Freshman'),
