@@ -7,10 +7,6 @@ from django.contrib.auth.models import User
 from UserProfiles.models import *
 from django.contrib.auth import authenticate
 
-
-
-
-
 @api_view(['POST'])
 def check_login(request):
     username = request.data.get('username')
