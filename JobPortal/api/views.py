@@ -1,12 +1,17 @@
 from django.http import JsonResponse
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view,authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from.serializers import *
 from django.contrib.auth.models import User
 from UserProfiles.models import *
 from django.contrib.auth import authenticate
+from rest_framework.authentication import SessionAuthentication
+from rest_framework.permissions import IsAuthenticated
 
+
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def check_login(request):
     username = request.data.get('username')
@@ -24,6 +29,8 @@ def check_login(request):
         # User not found
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'POST'])
 def getProfiles(request):
     if request.method == 'GET':
@@ -52,7 +59,8 @@ def getProfiles(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
 
-
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'PUT', 'DELETE'])
 def getProfile(request, username):
     try:
@@ -80,6 +88,8 @@ def getProfile(request, username):
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'POST'])
 def getJobPosts(request):
     if request.method == 'GET':
@@ -93,7 +103,8 @@ def getJobPosts(request):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'PUT', 'DELETE'])
 def getJobPost(request, pk):
     try:
@@ -116,7 +127,8 @@ def getJobPost(request, pk):
         job_post.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'POST'])
 def getJobApplications(request):
     if request.method == 'GET':
@@ -131,7 +143,8 @@ def getJobApplications(request):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET', 'PUT', 'DELETE'])
 def getJobApplication(request, id):
     try:
@@ -154,6 +167,8 @@ def getJobApplication(request, id):
         job_application.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
 @api_view(['GET'])
 def getWaitlist(request, jobid, username):
     try:
