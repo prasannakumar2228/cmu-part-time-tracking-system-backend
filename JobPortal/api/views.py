@@ -8,6 +8,7 @@ from UserProfiles.models import *
 from django.contrib.auth import authenticate
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
+from UserProfiles.models import *
 
 
 @authentication_classes([SessionAuthentication])
@@ -21,7 +22,10 @@ def check_login(request):
 
     if user is not None:
         # Authentication successful
-        return Response({'message': 'Login successful'}, status=status.HTTP_200_OK)
+        user=User.objects.get(username=username)
+        profile=Profile.objects.get(user=user)
+        role=profile.Role
+        return Response({'message': 'Login successful', 'role': role}, status=status.HTTP_200_OK)
     elif username is not None:
         # Username exists but password is wrong
         return Response({'error': 'Incorrect password'}, status=status.HTTP_401_UNAUTHORIZED)
@@ -64,8 +68,12 @@ def getProfiles(request):
 @api_view(['GET', 'PUT', 'DELETE'])
 def getProfile(request, username):
     try:
-        user = User.objects.get(username=username)
-        profile=Profile.objects.get(user=user)
+        if username.isdigit():
+            user = User.objects.get(id=username)
+            profile=Profile.objects.get(user=user)
+        else:
+            user = User.objects.get(username=username)
+            profile=Profile.objects.get(user=user)
     except user.DoesNotExist:
         return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
     except Profile.DoesNotExist:
@@ -87,6 +95,7 @@ def getProfile(request, username):
         profile = Profile.objects.get(user=user)
         profile.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
 
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
