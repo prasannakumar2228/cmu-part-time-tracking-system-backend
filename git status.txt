@@ -1,0 +1,4 @@
+git status
+git add .
+git commit -m "jkdbkjv"
+git push origin master

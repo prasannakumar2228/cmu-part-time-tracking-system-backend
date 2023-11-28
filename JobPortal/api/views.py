@@ -5,6 +5,9 @@ from rest_framework import status
 from.serializers import *
 from django.contrib.auth.models import User
 from UserProfiles.models import *
+from django.core.mail import send_mail
+from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
 from django.contrib.auth import authenticate
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -107,8 +110,20 @@ def getJobPosts(request):
         return Response(serializer.data, status=status.HTTP_200_OK)
     elif request.method == 'POST':
         serializer = JobPostSerializer(data=request.data)
+        try:
+            manager=User.objects.get(id=request.data['Manager'])
+        except User.DoesNotExist:
+            return Response(
+                {"error": f"User does not exist."},
+                status=status.HTTP_404_NOT_FOUND
+            )
         if serializer.is_valid():
             serializer.save()
+            Subject = 'New Job Post'
+            Body = f"Your jobpost for {request.data['Title']} has been posted succesfully."
+            send_mail(
+                Subject, Body, settings.EMAIL_HOST_USER, [manager.email], fail_silently=False
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
@@ -156,26 +171,47 @@ def getJobApplications(request):
 @permission_classes([IsAuthenticated])
 @api_view(['GET', 'PUT', 'DELETE'])
 def getJobApplication(request, id):
-    try:
-        job_application = JobApplication.objects.get(id=id)
-    except JobApplication.DoesNotExist:
-        return Response({'error': 'Job application not found'}, status=status.HTTP_404_NOT_FOUND)
+    if id.isdigit():
+        try:
+            job_application = JobApplication.objects.get(id=id)
+        except JobApplication.DoesNotExist:
+            return Response({'error': 'Job application not found'}, status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = JobApplicationSerializer(job_application)
-        return Response(serializer.data)
-
-    elif request.method == 'PUT':
-        serializer = JobApplicationSerializer(job_application, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        if request.method == 'GET':
+            serializer = JobApplicationSerializer(job_application)
             return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        job_application.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        elif request.method == 'PUT':
+            serializer = JobApplicationSerializer(job_application, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+        elif request.method == 'DELETE':
+            job_application.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    else:
+            try:
+                user = User.objects.get(username=id)
+                job_applications = JobApplication.objects.filter(Student=user.id)
+                if not job_applications.exists():
+                    return Response(
+                        {"error": "No job applications found for this user."},
+                        status=status.HTTP_404_NOT_FOUND
+                    ) 
+                serializer = JobApplicationSerializer(job_applications, many=True)
+                return Response(serializer.data)
+            except ObjectDoesNotExist as e:
+                return Response(
+                    {"error": f"User does not exist: {str(e)}"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Server error: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
 @api_view(['GET'])
@@ -199,5 +235,17 @@ def getWaitlist(request, jobid, username):
 
 
         
-    
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsAuthenticated])
+@api_view(['GET'])
+def getId(request, username):
+    try:
+        user = User.objects.get(username=username)
+    except user.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
+    except Profile.DoesNotExist:
+        return Response({'error': 'Profile not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    if request.method == 'GET':
+        return Response(user.id)
+    
