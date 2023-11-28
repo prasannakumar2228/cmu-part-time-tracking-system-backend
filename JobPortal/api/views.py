@@ -131,25 +131,48 @@ def getJobPosts(request):
 @permission_classes([IsAuthenticated])
 @api_view(['GET', 'PUT', 'DELETE'])
 def getJobPost(request, pk):
-    try:
-        job_post = JobPost.objects.get(id=pk)
-    except JobPost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+    if pk.isdigit():
+        try:
+            job_post = JobPost.objects.get(id=pk)
+        except JobPost.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
-        serializer = JobPostSerializer(job_post)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    elif request.method == 'PUT':
-        serializer = JobPostSerializer(job_post, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
+        if request.method == 'GET':
+            serializer = JobPostSerializer(job_post)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE':
-        job_post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        elif request.method == 'PUT':
+            serializer = JobPostSerializer(job_post, data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        elif request.method == 'DELETE':
+            job_post.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+    else:
+            try:
+                user=User.objects.get(username=pk)
+                job_posts = JobPost.objects.filter(Manager=user.id)
+                if not job_posts.exists():
+                    return Response(
+                        {"error": "No job posts found for this manager."},
+                        status=status.HTTP_404_NOT_FOUND
+                    ) 
+                serializer = JobPostSerializer(job_posts, many=True)
+                return Response(serializer.data)
+            except ObjectDoesNotExist as e:
+                return Response(
+                    {"error": f"User does not exist: {str(e)}"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
+            except Exception as e:
+                return Response(
+                    {"error": f"Server error: {str(e)}"},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+
 
 @authentication_classes([SessionAuthentication])
 @permission_classes([IsAuthenticated])
