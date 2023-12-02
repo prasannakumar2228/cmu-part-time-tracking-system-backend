@@ -246,7 +246,13 @@ def getWaitlist(request, jobid, username):
 
         if not application.exists():
             return Response({'error': 'Student is not in the waitlist'}, status=status.HTTP_404_NOT_FOUND)
-        position = list(application).index(application[0]) + 1
+        # position = list(application).index(application[0]) + 1
+        position=1
+        for record in application:
+            if record.Student==student:
+                break
+            else:
+                position+=1
         return Response({'position': position}, status=status.HTTP_200_OK)
 
     except JobPost.DoesNotExist:
