@@ -242,7 +242,7 @@ def getWaitlist(request, jobid, username):
     try:
         jobpost = JobPost.objects.get(id=jobid)
         student = Profile.objects.get(user__username=username)
-        application = JobApplication.objects.filter(Student=student,jobPost=jobpost,ApplicationStatus='waitlist').order_by('created_on')
+        application = JobApplication.objects.filter(jobPost=jobpost,ApplicationStatus='waitlist').order_by('created_on')
 
         if not application.exists():
             return Response({'error': 'Student is not in the waitlist'}, status=status.HTTP_404_NOT_FOUND)
@@ -271,4 +271,15 @@ def getId(request, username):
 
     if request.method == 'GET':
         return Response(user.id)
-    
+
+@api_view(['GET'])  
+def hire(request,jobpostid):
+    if request.method == 'GET':
+        jobApplications=JobApplication.objects.filter(jobPost=jobpostid)
+        if jobApplications.exists():
+            serializer = JobApplicationSerializer(jobApplications, many=True)
+            serialized_data = serializer.data
+            return Response({'applications': serialized_data}, status=status.HTTP_200_OK)
+        else:
+            return Response({'message': 'No applications found for this job post'}, status=status.HTTP_404_NOT_FOUND)
+        
