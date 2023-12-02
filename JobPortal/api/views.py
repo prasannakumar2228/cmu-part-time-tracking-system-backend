@@ -182,11 +182,19 @@ def getJobApplications(request):
         job_applications = JobApplication.objects.all()
         serializer = JobApplicationSerializer(job_applications, many=True)
         return Response(serializer.data, status=200)
-
     elif request.method == 'POST':
         serializer = JobApplicationSerializer(data=request.data)
+        jobpost=JobPost.objects.get(id=request.data['jobPost'])
+        print(jobpost.Title)
+        student=User.objects.get(id=request.data['Student'])
+        print(student.email)
         if serializer.is_valid():
             serializer.save()
+            Subject = 'New Job Application'
+            Body = f"Your Job Application for {jobpost.Title} has been submitted succesfully. You can login and check the status in CMUjobs Portal. "
+            send_mail(
+                Subject, Body, settings.EMAIL_HOST_USER, [student.email], fail_silently=False
+            )
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
