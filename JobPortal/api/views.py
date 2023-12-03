@@ -213,9 +213,30 @@ def getJobApplication(request, id):
             return Response(serializer.data)
 
         elif request.method == 'PUT':
+            oldApplicationStatus=job_application.ApplicationStatus
+            newApplicationStatus=request.data['ApplicationStatus']
             serializer = JobApplicationSerializer(job_application, data=request.data)
             if serializer.is_valid():
                 serializer.save()
+                jobpost=JobPost.objects.get(id=request.data['jobPost'])
+                student=User.objects.get(id=request.data['Student'])
+                if oldApplicationStatus!=newApplicationStatus:
+                    if newApplicationStatus=='approved':
+                        Subject = 'Status Change'
+                        Body = f"Status for your {jobpost.Title} application has been chaganged. Your application has been Approved. Manager will reach out to you soon for further proceedings"
+                        send_mail(Subject, Body, settings.EMAIL_HOST_USER, [student.email], fail_silently=False)
+                    elif newApplicationStatus=='rejected':
+                        Subject = 'Status Change'
+                        Body = f"Status for your {jobpost.Title} application has been chaganged. Your application has been rejected. Keep monitoring the CMUjobs Portal for any new job openings."
+                        send_mail(Subject, Body, settings.EMAIL_HOST_USER, [student.email], fail_silently=False)
+                    elif newApplicationStatus=='waitlist':
+                        Subject = 'Status Change'
+                        Body = f"Status for your {jobpost.Title} application has been chaganged. Your application has been waitlisted. You can check the application status in CMUjobs Portal"
+                        send_mail(Subject, Body, settings.EMAIL_HOST_USER, [student.email], fail_silently=False)
+                    elif newApplicationStatus=='shortlisted':
+                        Subject = 'Status Change'
+                        Body = f"Status for your {jobpost.Title} application has been chaganged. Your application has been Shortlisted. We will reach out to you if your application is approved"
+                        send_mail(Subject, Body, settings.EMAIL_HOST_USER, [student.email], fail_silently=False)
                 return Response(serializer.data)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
