@@ -145,8 +145,8 @@ CORS_ALLOWED_ORIGINS = [
 
 CORS_ALLOW_ALL_OROGINS=True
 
-EMAIL_USE_TLS = True  # Or False if your SMTP server doesn't use TLS
+EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'bis698team6@gmail.com'
-EMAIL_HOST_PASSWORD = 'wxwwdhmllzgasdke'
+EMAIL_HOST_USER = 'Team5project698@gmail.com'
+EMAIL_HOST_PASSWORD = 'cbpkzdvlcydbnadl'
